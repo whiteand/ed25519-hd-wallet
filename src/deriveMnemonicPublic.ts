@@ -1,4 +1,4 @@
-import { deriveSeedPublic } from './deriveSeedPublic';
+import { deriveSeedPublicFromStringPath } from './deriveSeedPublicFromStringPath';
 import { mnemonicToSeed } from './mnemonicToSeed';
 
 export async function deriveMnemonicPublic(
@@ -8,5 +8,5 @@ export async function deriveMnemonicPublic(
   prefix: string = 'mnemonic'
 ) {
   const seed = await mnemonicToSeed(mnemonic, passphrase, prefix);
-  return deriveSeedPublic(path, seed);
+  return deriveSeedPublicFromStringPath(path, seed);
 }

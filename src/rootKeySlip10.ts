@@ -1,9 +1,28 @@
 import { concat } from './concat';
-import { fromLE } from './fromLE';
 import { Fk, Fk256 } from './getHmacFunction';
-import { multiplyBase } from './multiplyBase';
+import { getPointA } from './getPointA';
 import { NFKDbytes } from './NFKDbytes';
 import { TNode, Uint256Bytes } from './types';
+
+function getKLAndKR(masterSecret: Uint8Array, key: Uint8Array) {
+  // KL:KR
+  let I = Fk(masterSecret, key);
+  let kL: Uint256Bytes = I.slice(0, 32) as Uint256Bytes;
+  let kR: Uint256Bytes = I.slice(32, 64) as Uint256Bytes;
+  while ((kL[31] & 0b00100000) !== 0) {
+    masterSecret = I;
+    I = Fk(masterSecret, key);
+    kL = I.slice(0, 32) as Uint256Bytes;
+    kR = I.slice(32, 64) as Uint256Bytes;
+  }
+  // the lowest 3 bits of the first byte of kL of are cleared
+  kL[0] &= 248;
+  // the highest bit of the last byte is cleared
+  kL[31] &= 127;
+  // the second highest bit of the last byte is set
+  kL[31] |= 64;
+  return { kL, kR };
+}
 
 /**
 INPUT:
@@ -29,25 +48,7 @@ export function rootKeySlip10(masterSecret: Uint8Array): TNode {
   const key = NFKDbytes('ed25519 seed');
   // root chain code
   const c = (Fk256(concat([1], masterSecret), key) as unknown) as Uint256Bytes;
-  // KL:KR
-  let I = Fk(masterSecret, key);
-  let kL: Uint256Bytes = I.slice(0, 32) as Uint256Bytes;
-  let kR: Uint256Bytes = I.slice(32, 64) as Uint256Bytes;
-  while ((kL[31] & 0b00100000) !== 0) {
-    masterSecret = I;
-    I = Fk(masterSecret, key);
-    kL = I.slice(0, 32) as Uint256Bytes;
-    kR = I.slice(32, 64) as Uint256Bytes;
-  }
-  // the lowest 3 bits of the first byte of kL of are cleared
-  kL[0] &= 248;
-  // the highest bit of the last byte is cleared
-  kL[31] &= 127;
-  // the second highest bit of the last byte is set
-  kL[31] |= 64;
-
-  const kScalar = fromLE(kL);
-  const P = multiplyBase(kScalar);
-  const A = P.toRawBytes() as Uint256Bytes;
+  const { kL, kR } = getKLAndKR(masterSecret, key);
+  const A = getPointA(kL);
   return [[kL, kR], A, c];
 }

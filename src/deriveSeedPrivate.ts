@@ -1,7 +1,7 @@
 import { pathToIndices } from './pathToIndices';
-import { privateChildKey } from './privateChildKey';
 import { rootKeySlip10 } from './rootKeySlip10';
 import { TNode, Uint512Bytes } from './types';
+import { derivePrivate } from './derivePrivate';
 
 /**
    INPUT:
@@ -17,8 +17,6 @@ export function deriveSeedPrivate(
   seed: Uint512Bytes
 ): TNode | null {
   const root = rootKeySlip10(seed);
-  return pathToIndices(path).reduce(
-    (node: TNode | null, ind) => privateChildKey(node, ind),
-    root
-  );
+  const indicies = pathToIndices(path);
+  return derivePrivate(indicies, root);
 }
