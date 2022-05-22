@@ -1,6 +1,7 @@
-import * as c from 'crypto';
 import { NFKDbytes } from './NFKDbytes';
 import { Uint512Bytes } from './types';
+import { pbkdf2Async } from '@noble/hashes/pbkdf2';
+import { sha512 } from '@noble/hashes/sha512';
 
 /**
  INPUT:
@@ -24,22 +25,14 @@ export async function mnemonicToSeed(
   passphrase: string = '',
   prefix: string = 'mnemonic'
 ): Promise<Uint512Bytes> {
-  //   const seed = hashlib.pbkdf2_hmac('sha512', _NFKDbytes(mnemonic), _NFKDbytes(prefix+passphrase), 2048)
-  return new Promise<Uint512Bytes>((resolve, reject) =>
-    c.pbkdf2(
-      NFKDbytes(mnemonic.join(' ')),
-      NFKDbytes(prefix + passphrase),
-      2048,
-      64,
-      'sha512',
-      (err, derivedKey) => {
-        if (err != null) {
-          reject(err);
-          return;
-        }
-        const bytes = new Uint8Array(derivedKey) as Uint512Bytes;
-        resolve(bytes);
-      }
-    )
+  const res = await pbkdf2Async(
+    sha512,
+    NFKDbytes(mnemonic.join(' ')),
+    NFKDbytes(prefix + passphrase),
+    {
+      c: 2048,
+      dkLen: 64,
+    }
   );
+  return res as Uint512Bytes;
 }

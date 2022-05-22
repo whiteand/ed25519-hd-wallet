@@ -8,7 +8,7 @@ export function getZAndCForNotHardernedDerivation(
   iBytes: Uint8Array
 ): { Z: Uint512Bytes; c: Uint256Bytes } {
   return {
-    Z: Fk(concat([2], AP, iBytes), cP),
+    Z: Fk(concat([2], AP, iBytes), cP) as Uint512Bytes,
     c: Fk(concat([3], AP, iBytes), cP).slice(32) as Uint256Bytes,
   };
 }

@@ -1,15 +1,11 @@
-import * as c from 'crypto';
+import { hmac } from '@noble/hashes/hmac';
+import { sha256 } from '@noble/hashes/sha256';
+import { sha512 } from '@noble/hashes/sha512';
 import { Uint512Bytes } from './types';
 
-function getHmacFunction(
-  algorithm: 'sha256' | 'sha512'
-): (message: Uint8Array, secret: Uint8Array) => Uint512Bytes {
-  return (message: Uint8Array, secret: Uint8Array) => {
-    const hmac = c.createHmac(algorithm, secret);
-    hmac.update(message);
-    const digest = hmac.digest();
-    return new Uint8Array(digest) as Uint512Bytes;
-  };
+export function Fk(message: Uint8Array, secret: Uint8Array): Uint512Bytes {
+  return hmac(sha512, secret, message) as Uint512Bytes;
 }
-export const Fk = getHmacFunction('sha512');
-export const Fk256 = getHmacFunction('sha256');
+export function Fk256(message: Uint8Array, secret: Uint8Array): Uint512Bytes {
+  return hmac(sha256, secret, message) as Uint512Bytes;
+}
