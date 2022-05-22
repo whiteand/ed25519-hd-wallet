@@ -33,6 +33,10 @@
   "name": "ed25519-hd-wallet",
   "author": "andrewbeletskiy",
   "module": "dist/ed25519-hd-wallet.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whiteand/ed25519-hd-wallet.git"
+  },
   "size-limit": [
     {
       "path": "dist/ed25519-hd-wallet.cjs.production.min.js",
