@@ -1,9 +1,9 @@
 import { privateChildKey } from './privateChildKey';
-import { TNode } from './types';
+import { IPrivateDerivationNode } from './types';
 
-export function derivePrivate(indicies: number[], root: TNode): TNode | null {
+export function derivePrivate(indicies: number[], root: IPrivateDerivationNode): IPrivateDerivationNode | null {
   return indicies.reduce(
-    (node: TNode | null, ind) => privateChildKey(node, ind),
+    (node: IPrivateDerivationNode | null, ind) => privateChildKey(node, ind),
     root
   );
 }

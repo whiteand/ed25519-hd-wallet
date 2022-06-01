@@ -8,3 +8,4 @@ export * from './pathToIndices';
 export * from './publicChildKey';
 export * from './privateChildKey';
 export * from './rootKeySlip10';
+export * from './types'

@@ -1,14 +1,15 @@
 import { publicChildKey } from './publicChildKey';
 import { Uint256Bytes } from './types';
+import { IPublicDerivationNode } from './types';
 
 export function derivePublic(
   derivationPathIndices: number[],
-  A: Uint256Bytes,
-  c: Uint256Bytes
-): [Uint256Bytes, Uint256Bytes] | null {
+  publicKey: Uint256Bytes,
+  chainCode: Uint256Bytes
+): IPublicDerivationNode | null {
   return derivationPathIndices.reduce(
-    (node: [Uint256Bytes, Uint256Bytes] | null, ind) =>
+    (node: IPublicDerivationNode | null, ind) =>
       publicChildKey(node, ind),
-    [A, c]
+    { publicKey, chainCode }
   );
 }

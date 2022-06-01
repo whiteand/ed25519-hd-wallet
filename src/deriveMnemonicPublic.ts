@@ -3,7 +3,7 @@ import { mnemonicToSeed } from './mnemonicToSeed';
 
 export async function deriveMnemonicPublic(
   path: string,
-  mnemonic: string[],
+  mnemonic: string,
   passphrase: string = '',
   prefix: string = 'mnemonic'
 ) {

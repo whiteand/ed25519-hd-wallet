@@ -35,8 +35,7 @@ describe.each(testcases)('%#', obj => {
       if (!res) {
         throw new Error('wrong result');
       }
-      const resultChainCode = res[1];
-      const resultPublicKey = res[0];
+      const { chainCode: resultChainCode, publicKey: resultPublicKey } = res
       if (!resultChainCode) {
         throw new Error('wrong result chain code');
       }
@@ -55,14 +54,15 @@ describe.each(testcases)('%#', obj => {
       const expectedKR = fromHex(privateDerivation.expected_kr);
       const expectedPublicKey = fromHex(privateDerivation.expected_public_key);
       const path = privateDerivation.path;
-      const res = derivePrivate(path, [[kl, kr], getPointA(kl), chainCode]);
+      const privateDerivationNode = { KL: kl, KR: kr, publicKey: getPointA(kl), chainCode };
+      const res = derivePrivate(path, privateDerivationNode);
       if (!res) {
         throw new Error('Wrong Result');
       }
-      expect(res[0][0]).toEqual(expectedKL);
-      expect(res[0][1]).toEqual(expectedKR);
-      expect(res[1]).toEqual(expectedPublicKey);
-      expect(res[2]).toEqual(expectedChainCode);
+      expect(res.KL).toEqual(expectedKL);
+      expect(res.KR).toEqual(expectedKR);
+      expect(res.publicKey).toEqual(expectedPublicKey);
+      expect(res.chainCode).toEqual(expectedChainCode);
     }
   });
 });

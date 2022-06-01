@@ -21,13 +21,13 @@ import { sha512 } from '@noble/hashes/sha512';
  */
 
 export async function mnemonicToSeed(
-  mnemonic: string[],
+  mnemonic: string,
   passphrase: string = '',
   prefix: string = 'mnemonic'
 ): Promise<Uint512Bytes> {
   const res = await pbkdf2Async(
     sha512,
-    NFKDbytes(mnemonic.join(' ')),
+    NFKDbytes(mnemonic),
     NFKDbytes(prefix + passphrase),
     {
       c: 2048,

@@ -2,26 +2,26 @@ import { concat } from './concat';
 import { Fk, Fk256 } from './getHmacFunction';
 import { getPointA } from './getPointA';
 import { NFKDbytes } from './NFKDbytes';
-import { TNode, Uint256Bytes } from './types';
+import { IPrivateDerivationNode, Uint256Bytes } from './types';
 
-function getKLAndKR(masterSecret: Uint8Array, key: Uint8Array) {
+function getKLAndKR(masterSecret: Uint8Array, key: Uint8Array): { KL: Uint256Bytes, KR: Uint256Bytes } {
   // KL:KR
   let I = Fk(masterSecret, key);
-  let kL: Uint256Bytes = I.slice(0, 32) as Uint256Bytes;
-  let kR: Uint256Bytes = I.slice(32, 64) as Uint256Bytes;
-  while ((kL[31] & 0b00100000) !== 0) {
+  let KL: Uint256Bytes = I.slice(0, 32) as Uint256Bytes;
+  let KR: Uint256Bytes = I.slice(32, 64) as Uint256Bytes;
+  while ((KL[31] & 0b00100000) !== 0) {
     masterSecret = I;
     I = Fk(masterSecret, key);
-    kL = I.slice(0, 32) as Uint256Bytes;
-    kR = I.slice(32, 64) as Uint256Bytes;
+    KL = I.slice(0, 32) as Uint256Bytes;
+    KR = I.slice(32, 64) as Uint256Bytes;
   }
   // the lowest 3 bits of the first byte of kL of are cleared
-  kL[0] &= 248;
+  KL[0] &= 248;
   // the highest bit of the last byte is cleared
-  kL[31] &= 127;
+  KL[31] &= 127;
   // the second highest bit of the last byte is set
-  kL[31] |= 64;
-  return { kL, kR };
+  KL[31] |= 64;
+  return { KL, KR };
 }
 
 /**
@@ -44,11 +44,16 @@ PROCESS:
     6. return (kL,kR), c
  */
 
-export function rootKeySlip10(masterSecret: Uint8Array): TNode {
+export function rootKeySlip10(masterSecret: Uint8Array): IPrivateDerivationNode {
   const key = NFKDbytes('ed25519 seed');
   // root chain code
   const c = (Fk256(concat([1], masterSecret), key) as unknown) as Uint256Bytes;
-  const { kL, kR } = getKLAndKR(masterSecret, key);
-  const A = getPointA(kL);
-  return [[kL, kR], A, c];
+  const { KL, KR } = getKLAndKR(masterSecret, key);
+  const A = getPointA(KL);
+  return {
+    KL,
+    KR,
+    publicKey: A,
+    chainCode: c
+  }
 }

@@ -3,7 +3,7 @@ import { assertUint32 } from './assertUint32';
 import { fromLE } from './fromLE';
 import { getZandC } from './getZandC';
 import { multiplyBase } from './multiplyBase';
-import { TNode, Uint256, Uint256Bytes } from './types';
+import { IPrivateDerivationNode, Uint256, Uint256Bytes } from './types';
 import { uint256ToBytes } from './uint256ToBytes';
 
 /**
@@ -43,24 +43,21 @@ import { uint256ToBytes } from './uint256ToBytes';
       8. return (kL_i,kR_i), A_i, c
  */
 
-export function privateChildKey(node: TNode | null, i: number): TNode | null {
+export function privateChildKey(node: IPrivateDerivationNode | null, i: number): IPrivateDerivationNode | null {
   if (node == null) return null;
   assertUint32(i);
   // unpack argument
-  const kLP = node[0][0];
-  const kRP = node[0][1];
-  const AP = node[1];
-  const cP = node[2];
+  const { KL: parentKL, KR: parentKR, publicKey: parentPublicKey, chainCode: parentChainCode } = node
 
-  const { Z, c } = getZandC(kLP, kRP, AP, cP, i);
+  const { Z, c } = getZandC(parentKL, parentKR, parentPublicKey, parentChainCode, i);
   const ZL = Z.slice(0, 28);
   const ZR = Z.slice(32) as Uint256Bytes;
-  const kLn = (fromLE(ZL) * 8n + fromLE(kLP)) as Uint256;
+  const kLn = (fromLE(ZL) * 8n + fromLE(parentKL)) as Uint256;
   if (kLn % CURVE.n == 0n) {
     return null;
   }
   // compute KRi
-  const kRn = ((fromLE(ZR) + fromLE(kRP)) % 2n ** 256n) as Uint256;
+  const kRn = ((fromLE(ZR) + fromLE(parentKR)) % 2n ** 256n) as Uint256;
   const kL = uint256ToBytes(kLn);
   const kR = uint256ToBytes(kRn);
 
@@ -69,5 +66,10 @@ export function privateChildKey(node: TNode | null, i: number): TNode | null {
   const P = multiplyBase(kScalar);
   const A = P.toRawBytes() as Uint256Bytes;
 
-  return [[kL, kR], A, c];
+  return {
+    KL: kL,
+    KR: kR,
+    publicKey: A,
+    chainCode: c
+  }
 }

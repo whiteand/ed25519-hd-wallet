@@ -5,6 +5,7 @@ import { getZAndCForNotHardernedDerivation } from './getZAndCForNotHardernedDeri
 import { multiplyBase } from './multiplyBase';
 import { Uint256Bytes } from './types';
 import { uint32ToBytes } from './uint32ToBytes';
+import { IPublicDerivationNode } from './types';
 
 /**
     INPUT:
@@ -41,13 +42,12 @@ import { uint32ToBytes } from './uint32ToBytes';
  */
 
 export function publicChildKey(
-  node: [Uint256Bytes, Uint256Bytes] | null,
+  node: IPublicDerivationNode | null,
   i: number
-): [Uint256Bytes, Uint256Bytes] | null {
+): IPublicDerivationNode | null {
   if (node == null) return null;
 
-  const AP = node[0];
-  const cP = node[1];
+  const { publicKey: parentPublicKey, chainCode: parentChainCode } = node
 
   assertUint32(i);
 
@@ -56,15 +56,15 @@ export function publicChildKey(
     return null;
   }
 
-  const { Z, c } = getZAndCForNotHardernedDerivation(AP, cP, uint32ToBytes(i));
+  const { Z, c } = getZAndCForNotHardernedDerivation(parentPublicKey, parentChainCode, uint32ToBytes(i));
 
   const ZL = Z.slice(0, 28);
 
   const ZLint = fromLE(ZL);
   const ZLint_x_8 = 8n * ZLint;
   const P = multiplyBase(ZLint_x_8);
-  const Q = Point.fromHex(AP);
+  const Q = Point.fromHex(parentPublicKey);
   const PQ = P.add(Q);
   const A = PQ.toRawBytes() as Uint256Bytes;
-  return [A, c];
+  return { publicKey: A, chainCode: c };
 }

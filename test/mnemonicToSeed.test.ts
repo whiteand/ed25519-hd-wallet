@@ -4,9 +4,7 @@ import { hex } from './hex';
 describe('mnemonicToSeed', () => {
   it('works', async () => {
     const seed = await mnemonicToSeed(
-      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'.split(
-        ' '
-      ),
+      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
       '',
       'mnemonic'
     );
