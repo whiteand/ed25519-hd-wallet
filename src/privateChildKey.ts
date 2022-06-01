@@ -33,16 +33,28 @@ import { uint256ToBytes } from './uint256ToBytes';
             kLi_ = zl_*8 + kL_
             if kLi_ % order == 0: child does not exist
             kL_i = int_to_LEBytes(kLi_)
-      6. compute kR_i
+            6. compute kR_i
             zr_  = LEBytes_to_int(ZR)
             kR_  = LEBytes_to_int(kR)
             kRi_ = (zr_ + kRn_) % 2^256
             kR_i = int_to_LEBytes(kRi_)
-      7. compute A
+            7. compute A
             A = kLi_.G
       8. return (kL_i,kR_i), A_i, c
- */
+      */
 
+const MAX_256_NUMBER = (() => {
+  let res = 2n; // 2^1
+  res *= res // 2^2
+  res *= res // 2^4
+  res *= res // 2^8
+  res *= res // 2^16
+  res *= res // 2^32
+  res *= res // 2^64
+  res *= res // 2^128
+  res *= res // 2^256
+  return res
+})()
 export function privateChildKey(node: IPrivateDerivationNode | null, i: number): IPrivateDerivationNode | null {
   if (node == null) return null;
   assertUint32(i);
@@ -57,7 +69,7 @@ export function privateChildKey(node: IPrivateDerivationNode | null, i: number):
     return null;
   }
   // compute KRi
-  const kRn = ((fromLE(ZR) + fromLE(parentKR)) % 2n ** 256n) as Uint256;
+  const kRn = ((fromLE(ZR) + fromLE(parentKR)) % MAX_256_NUMBER) as Uint256;
   const kL = uint256ToBytes(kLn);
   const kR = uint256ToBytes(kRn);
 
